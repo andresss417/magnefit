@@ -324,6 +324,77 @@
   }
   .add-btn:hover{background:var(--deep);}
 
+  /* ---------- vitrina destacada de productos (solo 3) ---------- */
+  .product-showcase{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:28px;
+  }
+  .feat-card{
+    position:relative;background:var(--white);border:1px solid #e7e6e0;border-radius:8px;
+    overflow:hidden;display:flex;flex-direction:column;
+    transition:transform .4s cubic-bezier(.2,.8,.2,1), box-shadow .4s ease, border-color .4s ease;
+  }
+  .feat-card:hover{
+    transform:translateY(-10px);
+    box-shadow:0 34px 60px -22px rgba(0,0,0,.35);
+    border-color:#cfd8db;
+  }
+  .feat-card.is-pack{
+    border:2px solid var(--accent);
+    box-shadow:0 20px 44px -20px rgba(0,0,0,.25);
+  }
+  .feat-role{
+    position:absolute;top:16px;left:16px;z-index:2;
+    background:var(--ink);color:var(--white);
+    font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    padding:6px 11px;border-radius:20px;
+  }
+  .feat-card.is-pack .feat-role{background:var(--accent);color:var(--ink);}
+  .feat-media{
+    height:300px;position:relative;overflow:hidden;
+    background:linear-gradient(160deg,#e9ede4 0%, #d8ddca 100%);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .feat-media img{
+    width:100%;height:100%;object-fit:cover;
+    transition:transform .6s cubic-bezier(.2,.8,.2,1);
+  }
+  .feat-card:hover .feat-media img{transform:scale(1.08);}
+  .feat-media svg{width:120px;transition:transform .5s ease;}
+  .feat-card:hover .feat-media svg{transform:scale(1.06) translateY(-4px);}
+  .feat-badge{
+    position:absolute;bottom:14px;left:14px;z-index:2;
+    background:var(--deep);color:var(--white);
+    font-size:11.5px;font-weight:700;letter-spacing:.03em;
+    padding:7px 12px;border-radius:2px;
+  }
+  .feat-badge-agotado{
+    position:absolute;bottom:14px;right:14px;z-index:2;
+    background:#c0392b;color:var(--white);
+    font-size:11px;font-weight:700;padding:7px 12px;border-radius:2px;
+  }
+  .feat-body{padding:24px 22px 26px;flex:1;display:flex;flex-direction:column;}
+  .feat-body h3{font-family:'Oswald';font-weight:600;font-size:20px;color:var(--ink);}
+  .feat-desc{font-size:13.5px;color:#767a70;margin-top:6px;line-height:1.5;min-height:40px;}
+  .feat-stars{color:var(--accent);font-size:13px;margin-top:10px;display:flex;align-items:center;gap:6px;}
+  .feat-stars span{color:#8b8f85;font-size:12px;}
+  .feat-price-row{display:flex;align-items:baseline;gap:10px;margin-top:14px;}
+  .feat-price-now{font-family:'Oswald';font-weight:600;font-size:26px;}
+  .feat-price-old{font-size:14px;color:#9a9d94;text-decoration:line-through;}
+  .feat-add{
+    margin-top:20px;width:100%;background:var(--ink);color:var(--white);
+    padding:15px 0;font-weight:700;font-size:13.5px;letter-spacing:.03em;border-radius:2px;
+    transition:background .25s ease, transform .2s ease;
+  }
+  .feat-add:hover{background:var(--accent);color:var(--ink);transform:translateY(-2px);}
+  .feat-add:disabled{background:#b9bcb2;cursor:not-allowed;transform:none;}
+  @media (max-width:900px){
+    .product-showcase{grid-template-columns:1fr;}
+  }
+
+  /* ---------- animación de aparición al hacer scroll ---------- */
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease, transform .7s cubic-bezier(.2,.8,.2,1);}
+  .reveal.in-view{opacity:1;transform:translateY(0);}
+
   /* ---------- gallery ---------- */
   .gallery-section{background:var(--bg);}
   .gallery-section .section-head h2{color:var(--white);}
@@ -334,10 +405,14 @@
   .gallery-item{
     position:relative;aspect-ratio:3/4;border-radius:4px;overflow:hidden;
     border:1px solid var(--line);
+    transition:transform .35s ease, box-shadow .35s ease;
   }
+  .gallery-item:hover{transform:translateY(-6px);box-shadow:0 20px 34px -16px rgba(0,0,0,.5);}
   .gallery-item .photo{
     position:absolute;inset:0;
+    transition:transform .5s ease;
   }
+  .gallery-item:hover .photo{transform:scale(1.06);}
   .gallery-item .grain{
     position:absolute;inset:0;
     background:linear-gradient(200deg, rgba(31,58,36,.55), rgba(10,12,10,.85));
@@ -364,11 +439,15 @@
     background:var(--white);
     display:grid;grid-template-columns:repeat(3,1fr);gap:36px;
   }
-  .feature{padding:6px 4px;}
+  .feature{padding:6px 4px;transition:transform .3s ease;}
+  .feature:hover{transform:translateY(-4px);}
   .feature .ficon{
     width:44px;height:44px;border-radius:50%;background:var(--deep);
     display:flex;align-items:center;justify-content:center;margin-bottom:16px;
+    transition:background .3s ease, transform .3s ease;
   }
+  .feature:hover .ficon{background:var(--accent);transform:scale(1.08);}
+  .feature:hover .ficon svg{stroke:var(--ink);}
   .feature .ficon svg{stroke:var(--white);width:20px;}
   .feature h3{font-family:'Inter';font-size:16px;font-weight:700;}
   .feature p{color:#666a61;font-size:14px;line-height:1.55;margin-top:8px;}
@@ -632,19 +711,15 @@
   <!-- PRODUCTS -->
   <section class="section" id="productos">
     <div class="wrap">
-      <div class="section-head">
+      <div class="section-head reveal">
         <div>
           <h2>Productos y packs</h2>
-          <p>Elige el formato para tu rutina — del bolso de gimnasio a la mochila de entrenamiento.</p>
-        </div>
-        <div class="arrows">
-          <button class="arrow-btn" onclick="scrollRow('prod',-1)" aria-label="Anterior"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg></button>
-          <button class="arrow-btn" onclick="scrollRow('prod',1)" aria-label="Siguiente"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"></path></svg></button>
+          <p>Nuestros 3 formatos: el clip de 50ml, el grande de 250ml, y el pack de ambos con envío gratis.</p>
         </div>
       </div>
 
-      <div class="scroll-row" id="row-prod">
-        <p style="color:#8b8f85;font-size:14px;padding:0 4px;">Cargando productos…</p>
+      <div class="product-showcase" id="row-prod">
+        <p style="color:#8b8f85;font-size:14px;">Cargando productos…</p>
       </div>
     </div>
   </section>
@@ -652,7 +727,7 @@
   <!-- GALLERY -->
   <section class="section gallery-section">
     <div class="wrap">
-      <div class="section-head">
+      <div class="section-head reveal">
         <div>
           <h2>Tus favoritos, en acción</h2>
           <p>La comunidad Magnefit entrenando con la fórmula al 99.9%.</p>
@@ -660,28 +735,28 @@
       </div>
       <div class="gallery-grid">
 
-        <div class="gallery-item">
+        <div class="gallery-item reveal">
           <div class="photo" style="background:linear-gradient(150deg,#234752,#0c1518);"></div>
           <div class="grain"></div>
           <div class="fig"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.3"><path d="M6 4v16M18 4v16M2 9h4M2 15h4M18 9h4M18 15h4M6 9h12v6H6z"></path></svg></div>
           <div class="gallery-caption"><p>Peso muerto, día pesado</p><p>Magnefit 50ml</p></div>
         </div>
 
-        <div class="gallery-item">
+        <div class="gallery-item reveal">
           <div class="photo" style="background:linear-gradient(150deg,#1a333c,#0a0c0a);"></div>
           <div class="grain"></div>
           <div class="fig"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.3"><circle cx="12" cy="6" r="3"></circle><path d="M5 21v-4a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v4"></path></svg></div>
           <div class="gallery-caption"><p>Cero resbalones en la barra</p><p>Magnefit Grande 250ml</p></div>
         </div>
 
-        <div class="gallery-item">
+        <div class="gallery-item reveal">
           <div class="photo" style="background:linear-gradient(150deg,#3a6472,#101c20);"></div>
           <div class="grain"></div>
           <div class="fig"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.3"><path d="M4 15l4-8 4 5 3-4 5 7"></path><circle cx="19" cy="6" r="1.6"></circle></svg></div>
           <div class="gallery-caption"><p>Más control, más seguridad</p><p>Magnefit 50ml</p></div>
         </div>
 
-        <div class="gallery-item">
+        <div class="gallery-item reveal">
           <div class="photo" style="background:linear-gradient(150deg,#16262b,#0a0c0a);"></div>
           <div class="grain"></div>
           <div class="fig"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.3"><rect x="4" y="10" width="16" height="4" rx="1"></rect><rect x="1" y="8" width="3" height="8" rx="1"></rect><rect x="20" y="8" width="3" height="8" rx="1"></rect></svg></div>
@@ -695,17 +770,17 @@
   <!-- FEATURES -->
   <section class="section" id="calidad">
     <div class="wrap features">
-      <div class="feature">
+      <div class="feature reveal">
         <div class="ficon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h15v13H1z"></path><path d="M16 8h4l3 3v5h-7V8z"></path><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg></div>
         <h3>Envío rápido</h3>
         <p>Despacho express a todo Chile, de Arica a Magallanes.</p>
       </div>
-      <div class="feature">
+      <div class="feature reveal">
         <div class="ficon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"></path><path d="M9 12l2 2 4-4"></path></svg></div>
         <h3>Calidad de laboratorio</h3>
         <p>Cada lote pasa por control de pureza antes de salir a la venta.</p>
       </div>
-      <div class="feature">
+      <div class="feature reveal">
         <div class="ficon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></div>
         <h3>+5.000 clientes</h3>
         <p>Magnefit no es solo una fórmula, es una comunidad que entrena en serio.</p>
@@ -716,29 +791,29 @@
   <!-- TESTIMONIALS -->
   <section class="section testi-section">
     <div class="wrap">
-      <div class="testi-head">
+      <div class="testi-head reveal">
         <h2>¿Qué dicen los clientes?</h2>
         <div class="testi-rating"><span class="stars">★★★★★</span><span>4.99 · 826 reseñas</span></div>
       </div>
 
       <div class="scroll-row" id="row-testi">
-        <div class="testi-card">
+        <div class="testi-card reveal">
           <p class="quote">"Excelente magnesio, se nota la diferencia desde la primera serie de dominadas."</p>
           <div><p class="testi-stars">★★★★★</p><p class="testi-name">Fernando M.</p><p class="testi-tag">Magnefit Grande 250ml</p></div>
         </div>
-        <div class="testi-card">
+        <div class="testi-card reveal">
           <p class="quote">"Rinde muchísimo y no ensucia la ropa. Quedé sorprendido con la calidad."</p>
           <div><p class="testi-stars">★★★★★</p><p class="testi-name">Elías A.</p><p class="testi-tag">Pack Dúo</p></div>
         </div>
-        <div class="testi-card">
+        <div class="testi-card reveal">
           <p class="quote">"Necesita que no se note tanto en las manos, pero cumple muy bien su función."</p>
           <div><p class="testi-stars">★★★☆☆</p><p class="testi-name">Anónimo</p><p class="testi-tag">Magnefit 50ml</p></div>
         </div>
-        <div class="testi-card">
+        <div class="testi-card reveal">
           <p class="quote">"Muy buen producto, fácil de usar, liviano y perfecto para llevar al gimnasio."</p>
           <div><p class="testi-stars">★★★★★</p><p class="testi-name">Constanza R.</p><p class="testi-tag">Magnefit 50ml</p></div>
         </div>
-        <div class="testi-card">
+        <div class="testi-card reveal">
           <p class="quote">"Muy buen producto, lo recomiendo para peso muerto y jalones."</p>
           <div><p class="testi-stars">★★★★★</p><p class="testi-name">John V.</p><p class="testi-tag">Magnefit</p></div>
         </div>
@@ -757,7 +832,7 @@
           <p>Magnesio líquido de pureza profesional, formulado para el agarre que exige tu entrenamiento.</p>
           <div class="social-row">
             <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1"></circle></svg></a>
-            <a href="#" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 20l1.1-5.4A8.5 8.5 0 1 1 21 11.5z"></path></svg></a>
+            <a href="#" aria-label="WhatsApp" id="wa-footer-link"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 20l1.1-5.4A8.5 8.5 0 1 1 21 11.5z"></path></svg></a>
           </div>
         </div>
         <div class="footer-col">
@@ -822,10 +897,12 @@
   }
 
   /* ============ CONFIGURACIÓN — completar antes de publicar ============ */
-  const WHATSAPP_NUMBER = "56912345678"; // TODO: reemplaza por el número real de Magnefit, formato 569XXXXXXXX
+  const WHATSAPP_NUMBER = "56950266266"; // Número real de Magnefit
+  document.getElementById('wa-float-btn').href = `https://wa.me/${WHATSAPP_NUMBER}`;
+  document.getElementById('wa-footer-link').href = `https://wa.me/${WHATSAPP_NUMBER}`;
 
-  const SUPABASE_URL = "https://sxvbvmwhghkdmgcplqyj.supabase.co";  // TODO: Project Settings > API
-  const SUPABASE_ANON_KEY = "sb_publishable_gIeKKvnXIyoo_HNRhDdArQ_oS-4thX3";     // TODO: Project Settings > API
+  const SUPABASE_URL = "https://sxvbvmwhghkdmgcplqyj.supabase.co";   // TODO: Project Settings > API
+  const SUPABASE_ANON_KEY = "sb_publishable_gIeKKvnXIyoo_HNRhDdArQ_oS-4thX3";  // TODO: Project Settings > API
   const SUPABASE_CONFIGURED = !SUPABASE_URL.includes("TU-PROYECTO");
 
   let sb = null;
@@ -875,42 +952,76 @@
     return `<svg viewBox="0 0 100 180" fill="none"><path d="M28 25 h44 c4 0 4 8 4 12 v120 c0 12-9 20-22 20s-22-8-22-20V37c0-4 0-12 4-12z" fill="#12242a"/><path d="M40 10h20v18H40z" fill="#c9c6b6"/><text x="50" y="90" text-anchor="middle" fill="#8fc4d6" font-family="Oswald" font-size="10">Mg</text></svg>`;
   }
 
+  function rolPara(p){
+    const n = p.nombre.toLowerCase();
+    if (n.includes('pack')) return 'MÁS ELEGIDO';
+    if (n.includes('250')) return 'MEJOR RENDIMIENTO';
+    if (n.includes('50ml')) return 'IDEAL PARA LLEVAR';
+    return null;
+  }
+
   function renderProductGrid(){
     rowProd.innerHTML = "";
     if (!products.length) {
       rowProd.innerHTML = `<p style="color:#8b8f85;font-size:14px;">Todavía no hay productos cargados.</p>`;
       return;
     }
-    products.forEach(p => {
+    products.forEach((p, idx) => {
       const card = document.createElement('div');
-      card.className = "card";
+      const esPack = p.nombre.toLowerCase().includes('pack');
+      card.className = "feat-card reveal" + (esPack ? " is-pack" : "");
       const media = p.imagen_url ? `<img src="${p.imagen_url}" alt="${p.nombre}">` : bottleSvg();
+      const rol = rolPara(p);
       card.innerHTML = `
-        <div class="card-media">
-          ${p.badge ? `<span class="badge${p.badge === 'NUEVO' ? ' badge-new' : ''}">${p.badge}</span>` : ''}
-          ${p.en_stock === false ? '<span class="badge-agotado">AGOTADO</span>' : ''}
+        <div class="feat-media">
+          ${rol ? `<span class="feat-role">${rol}</span>` : ''}
           ${media}
+          ${p.badge ? `<span class="feat-badge">${p.badge}</span>` : ''}
+          ${p.en_stock === false ? '<span class="feat-badge-agotado">AGOTADO</span>' : ''}
         </div>
-        <div class="card-body">
+        <div class="feat-body">
           <h3>${p.nombre}</h3>
-          <div class="card-stars">★★★★★ <span>(${p.reseñas ?? 0})</span></div>
-          <div class="price-row">
-            <span class="price-now">${CLP(p.precio)}</span>
-            ${p.precio_anterior ? `<span class="price-old">${CLP(p.precio_anterior)}</span>` : ''}
+          ${p.descripcion ? `<p class="feat-desc">${p.descripcion}</p>` : '<p class="feat-desc"></p>'}
+          <div class="feat-stars">★★★★★ <span>(${p.reseñas ?? 0})</span></div>
+          <div class="feat-price-row">
+            <span class="feat-price-now">${CLP(p.precio)}</span>
+            ${p.precio_anterior ? `<span class="feat-price-old">${CLP(p.precio_anterior)}</span>` : ''}
           </div>
-          <button class="add-btn" data-id="${p.id}" data-name="${p.nombre}" data-price="${p.precio}" ${p.en_stock === false ? 'disabled' : ''}>
+          <button class="feat-add" data-id="${p.id}" data-name="${p.nombre}" data-price="${p.precio}" ${p.en_stock === false ? 'disabled' : ''}>
             ${p.en_stock === false ? 'Agotado' : 'Agregar al carrito'}
           </button>
         </div>
       `;
+      card.style.transitionDelay = (idx * 110) + 'ms';
       rowProd.appendChild(card);
     });
+    observarReveal();
   }
 
   rowProd.addEventListener('click', e => {
-    const btn = e.target.closest('.add-btn');
+    const btn = e.target.closest('.feat-add');
     if (btn && !btn.disabled) addToCart(btn.dataset.id, btn.dataset.name, parseInt(btn.dataset.price, 10));
   });
+
+  /* ---------------- Animación de aparición al hacer scroll ---------------- */
+  let revealObserver = null;
+  function observarReveal(){
+    if (!('IntersectionObserver' in window)) {
+      document.querySelectorAll('.reveal').forEach(el => el.classList.add('in-view'));
+      return;
+    }
+    if (!revealObserver) {
+      revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+            revealObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+    }
+    document.querySelectorAll('.reveal:not(.in-view)').forEach(el => revealObserver.observe(el));
+  }
 
   /* ============ Carrito ============ */
   const CLP = n => (n ?? 0).toLocaleString('es-CL', { style:'currency', currency:'CLP', maximumFractionDigits:0 });
@@ -1070,6 +1181,7 @@
     renderProductGrid();
     renderCart();
     mostrarBannerPago();
+    observarReveal();
   }
   init();
 </script>
