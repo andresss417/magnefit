@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magnefit — Panel de administración</title>
+<meta name="robots" content="noindex, nofollow">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0c0a; --panel:#101410; --green-deep:#1f3a24; --green-toxic:#8fbf3f;
+    --white:#f3f3ee; --off:#c9cdc4; --line:#26302a; --card:#161a15; --danger:#c0392b;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--white);font-family:'Inter',sans-serif;min-height:100vh;}
+  h1,h2,h3{font-family:'Oswald',sans-serif;margin:0;}
+  button{font-family:inherit;cursor:pointer;}
+  input,select,textarea{font-family:inherit;}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 24px 80px;}
+
+  /* login */
+  #login-screen{ min-height:100vh;display:flex;align-items:center;justify-content:center; }
+  .login-box{ background:var(--panel);border:1px solid var(--line);border-radius:6px; padding:40px 34px;width:100%;max-width:360px; }
+  .login-box h1{font-size:24px;margin-bottom:6px;}
+  .login-box p{color:var(--off);font-size:13.5px;margin-bottom:24px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:12.5px;color:var(--off);margin-bottom:6px;}
+  .field input, .field textarea, .field select{
+    width:100%;background:var(--bg);border:1px solid var(--line);color:var(--white);
+    padding:11px 12px;border-radius:3px;font-size:14px;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus{outline:2px solid var(--green-toxic);outline-offset:1px;}
+  .btn{ background:var(--green-toxic);color:#0a0c0a;font-weight:700;font-size:14px; padding:12px 0;border-radius:3px;border:none;width:100%; transition:background .2s ease; }
+  .btn:hover{background:#a3d456;}
+  .btn:disabled{background:#4a5a3f;color:#8b9585;cursor:not-allowed;}
+  .btn-outline{ background:transparent;border:1px solid var(--line);color:var(--white);font-weight:600;font-size:13px; padding:9px 14px;border-radius:3px; }
+  .btn-outline:hover{border-color:var(--green-toxic);color:var(--green-toxic);}
+  .btn-danger{background:var(--danger);color:var(--white);font-weight:700;font-size:12.5px;padding:8px 12px;border-radius:3px;border:none;}
+  .btn-danger:hover{background:#a5311f;}
+  .error-msg{color:#e08a7d;font-size:13px;margin-top:10px;}
+
+  /* dashboard shell */
+  #dashboard{display:none;}
+  header.top{ background:var(--panel);border-bottom:1px solid var(--line); display:flex;align-items:center;justify-content:space-between; padding:16px 24px; }
+  .logo{font-family:'Oswald';font-size:19px;font-weight:600;}
+  .logo em{font-style:normal;color:var(--green-toxic);}
+  .top-actions{display:flex;align-items:center;gap:14px;}
+  .top-actions span{font-size:12.5px;color:var(--off);}
+
+  .tabs{display:flex;gap:6px;margin-bottom:28px;border-bottom:1px solid var(--line);}
+  .tab-btn{ background:none;border:none;color:var(--off);font-weight:600;font-size:14px; padding:10px 6px;border-bottom:2px solid transparent; }
+  .tab-btn.active{color:var(--white);border-color:var(--green-toxic);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  .panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+  .panel-head h2{font-size:20px;}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{ text-align:left;color:var(--off);font-weight:600;font-size:11.5px;letter-spacing:.04em; text-transform:uppercase;padding:10px 12px;border-bottom:1px solid var(--line); }
+  td{padding:12px;border-bottom:1px solid var(--line);vertical-align:top;}
+  tr:hover td{background:rgba(255,255,255,0.02);}
+  .muted{color:var(--off);}
+  .pill{ display:inline-block;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:700; }
+  .pill.confirmado{background:#233a1f;color:#9ed26b;}
+  .pill.pendiente_pago{background:#3a3320;color:#e3c56a;}
+  .pill.rechazado{background:#3a2020;color:#e08a7d;}
+  .row-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .link-btn{background:none;border:none;color:var(--green-toxic);font-size:12.5px;font-weight:600;padding:0;}
+  .link-btn:hover{text-decoration:underline;}
+  .stock-off{color:#e08a7d;font-weight:700;}
+
+  /* modal */
+  #modal-overlay{ position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;z-index:100;padding:20px; }
+  #modal-overlay.open{display:flex;}
+  .modal{ background:var(--panel);border:1px solid var(--line);border-radius:6px; width:100%;max-width:480px;padding:28px;max-height:90vh;overflow-y:auto; }
+  .modal h3{font-size:19px;margin-bottom:18px;}
+  .modal-actions{display:flex;gap:10px;margin-top:20px;}
+  .checkbox-row{display:flex;align-items:center;gap:8px;margin-bottom:16px;}
+  .checkbox-row input{width:auto;}
+  .empty-state{color:var(--off);font-size:14px;padding:30px 0;text-align:center;}
+</style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div id="login-screen">
+    <div class="login-box">
+      <h1>MAGNE<em style="color:var(--green-toxic);font-style:normal;">FIT</em></h1>
+      <p>Panel de administración — acceso restringido</p>
+      <form id="login-form">
+        <div class="field">
+          <label for="login-email">Correo</label>
+          <input type="email" id="login-email" required autocomplete="username">
+        </div>
+        <div class="field">
+          <label for="login-pass">Contraseña</label>
+          <input type="password" id="login-pass" required autocomplete="current-password">
+        </div>
+        <button class="btn" type="submit" id="login-btn">Ingresar</button>
+        <p class="error-msg" id="login-error" style="display:none;"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboard">
+    <header class="top">
+      <a href="#" class="logo">MAGNE<em>FIT</em> · admin</a>
+      <div class="top-actions">
+        <span id="user-email"></span>
+        <button class="btn-outline" id="logout-btn">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <div class="wrap">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="productos">Productos</button>
+        <button class="tab-btn" data-tab="pedidos">Pedidos</button>
+      </div>
+
+      <!-- PRODUCTOS -->
+      <section class="tab-panel active" id="tab-productos">
+        <div class="panel-head">
+          <h2>Productos</h2>
+          <button class="btn-outline" id="btn-nuevo-producto">+ Nuevo producto</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr><th>Producto</th><th>Precio</th><th>Antes</th><th>Etiqueta</th><th>Stock</th><th>Orden</th><th></th></tr>
+            </thead>
+            <tbody id="tbl-productos"><tr><td colspan="7" class="muted">Cargando…</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- PEDIDOS -->
+      <section class="tab-panel" id="tab-pedidos">
+        <div class="panel-head">
+          <h2>Pedidos</h2>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr><th>Fecha</th><th>Cliente</th><th>Teléfono</th><th>Items</th><th>Total</th><th>Estado</th></tr>
+            </thead>
+            <tbody id="tbl-pedidos"><tr><td colspan="6" class="muted">Cargando…</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- MODAL PRODUCTO -->
+  <div id="modal-overlay">
+    <div class="modal">
+      <h3 id="modal-title">Nuevo producto</h3>
+      <form id="form-producto">
+        <input type="hidden" id="p-id">
+        <div class="field"><label>Nombre</label><input type="text" id="p-nombre" required></div>
+        <div class="field"><label>Descripción corta</label><textarea id="p-descripcion" rows="2"></textarea></div>
+        <div class="field"><label>Precio (CLP)</label><input type="number" id="p-precio" min="0" required></div>
+        <div class="field"><label>Precio anterior (opcional, para mostrar descuento)</label><input type="number" id="p-precio-anterior" min="0"></div>
+        <div class="field"><label>Etiqueta (ej. "AHORRA 16%")</label><input type="text" id="p-badge"></div>
+        <div class="field"><label>URL de imagen (opcional)</label><input type="text" id="p-imagen"></div>
+        <div class="field"><label>Orden (menor número aparece primero)</label><input type="number" id="p-orden" value="0"></div>
+        <div class="checkbox-row"><input type="checkbox" id="p-stock" checked><label for="p-stock">En stock</label></div>
+        <p class="error-msg" id="form-error" style="display:none;"></p>
+        <div class="modal-actions">
+          <button type="button" class="btn-outline" id="btn-cancelar" style="flex:1;">Cancelar</button>
+          <button type="submit" class="btn" style="flex:1;" id="btn-guardar-producto">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+<script>
+  /* ============ CONFIGURACIÓN — completar antes de publicar ============ */
+  const SUPABASE_URL = "https://sxvbvmwhghkdmgcplqyj.supabase.co";   // TODO: Project Settings > API
+  const SUPABASE_ANON_KEY = "sb_publishable_gIeKKvnXIyoo_HNRhDdArQ_oS-4thX3";      // TODO: Project Settings > API
+
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const CLP = n => (n ?? 0).toLocaleString('es-CL', { style:'currency', currency:'CLP', maximumFractionDigits:0 });
+
+  const loginScreen = document.getElementById('login-screen');
+  const dashboard = document.getElementById('dashboard');
+
+  /* ---------------- Auth ---------------- */
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('login-btn');
+    const errorEl = document.getElementById('login-error');
+    errorEl.style.display = 'none';
+    btn.disabled = true; btn.textContent = 'Ingresando…';
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-pass').value;
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    btn.disabled = false; btn.textContent = 'Ingresar';
+    if (error) {
+      errorEl.textContent = 'Correo o contraseña incorrectos.';
+      errorEl.style.display = 'block';
+      return;
+    }
+    mostrarDashboard();
+  });
+
+  document.getElementById('logout-btn').addEventListener('click', async () => {
+    await sb.auth.signOut();
+    dashboard.style.display = 'none';
+    loginScreen.style.display = 'flex';
+  });
+
+  async function mostrarDashboard(){
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) { loginScreen.style.display = 'flex'; dashboard.style.display = 'none'; return; }
+    document.getElementById('user-email').textContent = session.user.email;
+    loginScreen.style.display = 'none';
+    dashboard.style.display = 'block';
+    cargarProductos();
+    cargarPedidos();
+  }
+
+  /* ---------------- Tabs ---------------- */
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  /* ---------------- Productos ---------------- */
+  async function cargarProductos(){
+    const tbl = document.getElementById('tbl-productos');
+    const { data, error } = await sb.from('productos').select('*').order('orden', { ascending: true });
+    if (error) { tbl.innerHTML = `<tr><td colspan="7" class="error-msg">Error cargando productos: ${error.message}</td></tr>`; return; }
+    if (!data || data.length === 0) { tbl.innerHTML = `<tr><td colspan="7" class="empty-state">Sin productos todavía.</td></tr>`; return; }
+    tbl.innerHTML = data.map(p => `
+      <tr>
+        <td><strong>${p.nombre}</strong>${p.descripcion ? `<br><span class="muted">${p.descripcion}</span>` : ''}</td>
+        <td>${CLP(p.precio)}</td>
+        <td class="muted">${p.precio_anterior ? CLP(p.precio_anterior) : '—'}</td>
+        <td class="muted">${p.badge ?? '—'}</td>
+        <td>${p.en_stock === false ? '<span class="stock-off">Agotado</span>' : 'Disponible'}</td>
+        <td class="muted">${p.orden ?? 0}</td>
+        <td class="row-actions">
+          <button class="link-btn" data-edit="${p.id}">Editar</button>
+          <button class="link-btn" style="color:#e08a7d;" data-del="${p.id}">Eliminar</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  document.getElementById('tbl-productos').addEventListener('click', async (e) => {
+    const editId = e.target.dataset.edit;
+    const delId = e.target.dataset.del;
+    if (editId) return abrirModalEdicion(editId);
+    if (delId) {
+      if (!confirm('¿Eliminar este producto? Esta acción no se puede deshacer.')) return;
+      const { error } = await sb.from('productos').delete().eq('id', delId);
+      if (error) alert('No se pudo eliminar: ' + error.message);
+      else cargarProductos();
+    }
+  });
+
+  const modalOverlay = document.getElementById('modal-overlay');
+  document.getElementById('btn-nuevo-producto').addEventListener('click', () => abrirModal());
+  document.getElementById('btn-cancelar').addEventListener('click', () => modalOverlay.classList.remove('open'));
+
+  function abrirModal(producto){
+    document.getElementById('form-error').style.display = 'none';
+    document.getElementById('modal-title').textContent = producto ? 'Editar producto' : 'Nuevo producto';
+    document.getElementById('p-id').value = producto?.id ?? '';
+    document.getElementById('p-nombre').value = producto?.nombre ?? '';
+    document.getElementById('p-descripcion').value = producto?.descripcion ?? '';
+    document.getElementById('p-precio').value = producto?.precio ?? '';
+    document.getElementById('p-precio-anterior').value = producto?.precio_anterior ?? '';
+    document.getElementById('p-badge').value = producto?.badge ?? '';
+    document.getElementById('p-imagen').value = producto?.imagen_url ?? '';
+    document.getElementById('p-orden').value = producto?.orden ?? 0;
+    document.getElementById('p-stock').checked = producto ? producto.en_stock !== false : true;
+    modalOverlay.classList.add('open');
+  }
+
+  async function abrirModalEdicion(id){
+    const { data, error } = await sb.from('productos').select('*').eq('id', id).single();
+    if (error) { alert('No se pudo cargar el producto: ' + error.message); return; }
+    abrirModal(data);
+  }
+
+  document.getElementById('form-producto').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btn-guardar-producto');
+    const errorEl = document.getElementById('form-error');
+    errorEl.style.display = 'none';
+    btn.disabled = true; btn.textContent = 'Guardando…';
+
+    const id = document.getElementById('p-id').value;
+    const payload = {
+      nombre: document.getElementById('p-nombre').value.trim(),
+      descripcion: document.getElementById('p-descripcion').value.trim() || null,
+      precio: parseInt(document.getElementById('p-precio').value, 10),
+      precio_anterior: document.getElementById('p-precio-anterior').value ? parseInt(document.getElementById('p-precio-anterior').value, 10) : null,
+      badge: document.getElementById('p-badge').value.trim() || null,
+      imagen_url: document.getElementById('p-imagen').value.trim() || null,
+      orden: parseInt(document.getElementById('p-orden').value, 10) || 0,
+      en_stock: document.getElementById('p-stock').checked
+    };
+
+    const { error } = id
+      ? await sb.from('productos').update(payload).eq('id', id)
+      : await sb.from('productos').insert(payload);
+
+    btn.disabled = false; btn.textContent = 'Guardar';
+
+    if (error) {
+      errorEl.textContent = 'Error al guardar: ' + error.message;
+      errorEl.style.display = 'block';
+      return;
+    }
+    modalOverlay.classList.remove('open');
+    cargarProductos();
+  });
+
+  /* ---------------- Pedidos ---------------- */
+  async function cargarPedidos(){
+    const tbl = document.getElementById('tbl-pedidos');
+    const { data, error } = await sb.from('pedidos').select('*').order('creado_en', { ascending: false }).limit(200);
+    if (error) { tbl.innerHTML = `<tr><td colspan="6" class="error-msg">Error cargando pedidos: ${error.message}</td></tr>`; return; }
+    if (!data || data.length === 0) { tbl.innerHTML = `<tr><td colspan="6" class="empty-state">Todavía no hay pedidos.</td></tr>`; return; }
+    tbl.innerHTML = data.map(pedido => {
+      const fecha = pedido.creado_en ? new Date(pedido.creado_en).toLocaleString('es-CL') : '—';
+      const items = Array.isArray(pedido.items)
+        ? pedido.items.map(i => `${i.cantidad ?? 1}× ${i.nombre}`).join('<br>')
+        : '—';
+      return `
+        <tr>
+          <td class="muted">${fecha}</td>
+          <td>${pedido.nombre_cliente ?? '—'}</td>
+          <td class="muted">${pedido.telefono ?? '—'}</td>
+          <td class="muted">${items}</td>
+          <td>${CLP(pedido.total)}</td>
+          <td><span class="pill ${pedido.estado}">${pedido.estado}</span></td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  /* ---------------- Arranque ---------------- */
+  (async function init(){
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) mostrarDashboard();
+  })();
+</script>
+
+</body>
+</html>
